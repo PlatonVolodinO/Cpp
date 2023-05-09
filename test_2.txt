@@ -1,0 +1,5 @@
+program
+{
+    string x = "abc", y = "def", z = "hgk", f;
+    f = x + y + z;
+}
