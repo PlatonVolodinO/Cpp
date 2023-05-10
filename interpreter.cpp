@@ -974,7 +974,6 @@ void Parser::check_id_in_read()
 
 void Parser::check_op()
 {
-    // EDITED!
     LexType t1, t2, op;
 
     from_st(st_lex, t2);
