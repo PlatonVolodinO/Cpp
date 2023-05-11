@@ -358,14 +358,6 @@ public:
                 }
                 break;
             case PLUS:
-                if (c == '=' || c == '+')
-                {
-                    str.push_back(c);
-                    j = find(str, TD);
-                    return Lex((LexType)(j + (int)LEX_SEMICOLON), j);
-                }
-                else
-                {
                     if (isalpha(c))
                     {
                         str.pop_back();
@@ -383,17 +375,7 @@ public:
                     flag = false;
                     j = find(str, TD);
                     return Lex((LexType)(j + (int)LEX_SEMICOLON), j);
-                }
-                break;
             case MINUS:
-                if (c == '=' || c == '-')
-                {
-                    str.push_back(c);
-                    j = find(str, TD);
-                    return Lex((LexType)(j + (int)LEX_SEMICOLON), j);
-                }
-                else
-                {
                     if (isalpha(c))
                     {
                         is_unary_minus = true;
@@ -413,8 +395,6 @@ public:
                     flag = false;
                     j = find(str, TD);
                     return Lex((LexType)(j + (int)LEX_SEMICOLON), j);
-                }
-                break;
             case MUL_PER:
                 j = find(str, TD);
                 return Lex((LexType)(j + (int)LEX_SEMICOLON), j);
