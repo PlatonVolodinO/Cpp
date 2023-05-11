@@ -375,6 +375,7 @@ public:
                     flag = false;
                     j = find(str, TD);
                     return Lex((LexType)(j + (int)LEX_SEMICOLON), j);
+                    break;
             case MINUS:
                     if (isalpha(c))
                     {
@@ -395,6 +396,7 @@ public:
                     flag = false;
                     j = find(str, TD);
                     return Lex((LexType)(j + (int)LEX_SEMICOLON), j);
+                    break;
             case MUL_PER:
                 j = find(str, TD);
                 return Lex((LexType)(j + (int)LEX_SEMICOLON), j);
