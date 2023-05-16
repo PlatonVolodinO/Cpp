@@ -1,0 +1,15 @@
+program
+{
+    string x = "x", y = "y";
+    int a = 1, b = 10;
+
+    while (a < b) {
+        a = a + 1;
+        write(a);
+        x = x + y;
+    }
+
+    write(x);
+}
+
+/* Correct */
