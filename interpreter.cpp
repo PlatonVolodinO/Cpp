@@ -6,6 +6,7 @@
 #include <fstream>
 #include <string>
 
+
 using namespace std;
 ifstream file;
 
@@ -181,7 +182,7 @@ class Lex
     // Или значение для типа INT
     // В случае STRING | REAL - 0
     int l_value;
-    //
+    // Значение, если REAL (FLOAT_NUMB)
     double l_real;
     // Значение, если STRING
     string l_str;
@@ -224,6 +225,11 @@ ostream &operator<<(ostream &out, Lex l)
         type = "NUM";
         type_of_table = "";
     }
+    else if (l.l_type == LEX_FLOAT_NUMB)
+    {
+        type = "REAL";
+        type_of_table = "";
+    }
     // Идентификатор
     if (l.l_type == LEX_ID)
     {
@@ -239,9 +245,16 @@ ostream &operator<<(ostream &out, Lex l)
         out << " < " << type << " | " << type_of_table << l.l_str << " > "
             << "\n";
     }
+    else if (l.l_type == LEX_FLOAT_NUMB) 
+    {
+        out << " < " << type << " | " << type_of_table << l.l_real << " > "
+            << "\n";
+    }
     else
+    {
         out << " < " << type << " | " << type_of_table << l.l_value << " > "
             << "\n";
+    }
     return out;
 }
 
@@ -821,7 +834,7 @@ void Parser::S()
         else if (c_type == LEX_STRING)
             def_type = LEX_STR_CONST;
         else
-            def_type = LEX_REAL;
+            def_type = LEX_FLOAT_NUMB;
         gl();
         D();
     }
@@ -908,6 +921,8 @@ void Parser::D()
             E();
             prog.put_lex(Lex(LEX_EQ));
             from_st(st_lex, i);
+            if (i != def_type)
+                throw "Wrong type: waited: " + to_string(def_type) + ", got: " + to_string(i);
             dec(i, l_v_index);
         }
         else
@@ -935,6 +950,8 @@ void Parser::D()
                     E();
                     prog.put_lex(Lex(LEX_EQ));
                     from_st(st_lex, i);
+                    if (i != def_type)
+                        throw "Wrong type: waited: " + to_string(def_type) + ", got: " + to_string(i);
                     dec(i, l_v_index);
                 }
                 else
@@ -1145,9 +1162,9 @@ void Parser::check_op()
     {
         st_lex.push(LEX_BOOL);
     }
-    else if (t1 == LEX_NUMB && (op == LEX_PLUS || op == LEX_MINUS || op == LEX_TIMES || op == LEX_SLASH))
+    else if ((t1 == LEX_NUMB || t1 == LEX_FLOAT_NUMB) && (op == LEX_PLUS || op == LEX_MINUS || op == LEX_TIMES || op == LEX_SLASH))
     {
-        st_lex.push(LEX_NUMB);
+        st_lex.push(t1);
     }
     else if (t1 == LEX_STR_CONST && op == LEX_PLUS)
     {
@@ -1251,7 +1268,6 @@ public:
             }
             else if (l_type == LEX_FLOAT_NUMB)
             {
-
                 cout << i << ":\t <REAL | " << p.prog[i].GetReal() << " >" << endl;
             }
             else if (l_type == LEX_STR_CONST)
@@ -1445,23 +1461,48 @@ public:
                 break;
             case LEX_LSS:
                 setTwoOperands();
-                args.push(Lex(LEX_BOOL, second_op.GetValue() < first_op.GetValue()));
+                if (second_op.GetType() == LEX_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetValue() < first_op.GetValue()));
+                else if (second_op.GetType() == LEX_FLOAT_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetReal() < first_op.GetReal()));
+                else 
+                    args.push(Lex(LEX_BOOL, second_op.GetStr() < first_op.GetStr()));
                 break;
             case LEX_GTR:
                 setTwoOperands();
-                args.push(Lex(LEX_BOOL, second_op.GetValue() > first_op.GetValue()));
+                if (second_op.GetType() == LEX_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetValue() > first_op.GetValue()));
+                else if (second_op.GetType() == LEX_FLOAT_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetReal() > first_op.GetReal()));
+                else 
+                    args.push(Lex(LEX_BOOL, second_op.GetStr() > first_op.GetStr()));
                 break;
             case LEX_LEQ:
                 setTwoOperands();
-                args.push(Lex(LEX_BOOL, second_op.GetValue() <= first_op.GetValue()));
+                if (second_op.GetType() == LEX_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetValue() <= first_op.GetValue()));
+                else if (second_op.GetType() == LEX_FLOAT_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetReal() <= first_op.GetReal()));
+                else 
+                    args.push(Lex(LEX_BOOL, second_op.GetStr() <= first_op.GetStr()));
                 break;
             case LEX_GEQ:
                 setTwoOperands();
-                args.push(Lex(LEX_BOOL, second_op.GetValue() >= first_op.GetValue()));
+                if (second_op.GetType() == LEX_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetValue() >= first_op.GetValue()));
+                else if (second_op.GetType() == LEX_FLOAT_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetReal() >= first_op.GetReal()));
+                else 
+                    args.push(Lex(LEX_BOOL, second_op.GetStr() >= first_op.GetStr()));
                 break;
             case LEX_NEQ:
                 setTwoOperands();
-                args.push(Lex(LEX_BOOL, second_op.GetValue() != first_op.GetValue()));
+                if (second_op.GetType() == LEX_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetValue() != first_op.GetValue()));
+                else if (second_op.GetType() == LEX_FLOAT_NUMB)
+                    args.push(Lex(LEX_BOOL, second_op.GetReal() != first_op.GetReal()));
+                else 
+                    args.push(Lex(LEX_BOOL, second_op.GetStr() != first_op.GetStr()));
                 break;
             case LEX_EQ:
                 setSingleOperand();
